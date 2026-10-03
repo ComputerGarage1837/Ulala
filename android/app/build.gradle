@@ -1,0 +1,32 @@
+plugins { id 'com.android.application' }
+if (file('google-services.json').exists()) { apply plugin: 'com.google.gms.google-services' }
+android {
+ namespace 'ca.loonandhearth.staff'
+ compileSdk 35
+ defaultConfig {
+  applicationId 'ca.loonandhearth.staff'
+  minSdk 26
+  targetSdk 35
+  versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+  versionName System.getenv('VERSION_NAME') ?: '1.0.0'
+  buildConfigField 'boolean', 'PUSH_CONFIGURED', file('google-services.json').exists() ? 'true' : 'false'
+ }
+ buildFeatures { buildConfig true }
+ signingConfigs {
+  release {
+   if (System.getenv('KEYSTORE_PATH')) {
+    storeFile file(System.getenv('KEYSTORE_PATH'))
+    storePassword System.getenv('KEYSTORE_PASSWORD')
+    keyAlias System.getenv('KEY_ALIAS')
+    keyPassword System.getenv('KEY_PASSWORD')
+   }
+  }
+ }
+ buildTypes { release { if (System.getenv('KEYSTORE_PATH')) signingConfig signingConfigs.release; minifyEnabled false } }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+ implementation platform('com.google.firebase:firebase-bom:33.12.0')
+ implementation 'com.google.firebase:firebase-messaging'
+ implementation 'androidx.core:core:1.15.0'
+}
